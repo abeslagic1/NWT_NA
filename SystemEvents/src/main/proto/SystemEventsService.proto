@@ -1,0 +1,23 @@
+syntax = "proto3";
+option java_multiple_files = true;
+package com.etf;
+option java_package = "com.etf.proto";
+
+
+message SystemEventRequest {
+  string timestamp = 1;
+  string microservice_name = 2;
+  string user = 3;
+  string action_type = 4; // create, delete, get, update
+  string resource_name = 5;
+  string response_type = 6; // success, error
+  string description = 7; // optional, for detailed error message
+}
+
+message SystemEventResponse {
+  string response=1;
+}
+
+service SystemEventsService {
+  rpc systemEventLog(SystemEventRequest) returns (SystemEventResponse);
+}
