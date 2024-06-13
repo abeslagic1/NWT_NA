@@ -16,11 +16,11 @@ public class Pacijent {
     private Integer id;
 
     //    @NotBlank(message = "First name must be entered.")
-//    @Size(min = 3, max = 50, message = "Length mus be at least 3 chars long.")
+    //    @Size(min = 3, max = 50, message = "Length mus be at least 3 chars long.")
     private String ime;
 
     //    @NotBlank(message = "Last name must be entered.")
-//    @Size(min = 3, max = 50, message = "Length mus be at least 3 chars long.")
+    //    @Size(min = 3, max = 50, message = "Length mus be at least 3 chars long.")
     private String prezime;
     private Boolean samUSobi;
 

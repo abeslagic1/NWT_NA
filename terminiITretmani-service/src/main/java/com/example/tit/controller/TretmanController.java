@@ -1,17 +1,14 @@
 package com.example.tit.controller;
 
+import com.example.tit.Feign.ReservationClient;
+import com.example.tit.dto.Soba;
+import com.example.tit.model.TitRegClass;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.*;
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 //import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 
 import com.example.tit.dao.TretmanRepository;
 import com.example.tit.model.Tretman;
@@ -82,5 +79,23 @@ public class TretmanController {
       //  return tretmanRepository.findAll();
     //}
 
+
+    // Poziv koji sadrzi i odgovor iz Reservation servisa
+
+
+    @Autowired
+    private ReservationClient sobaClient;
+
+    @GetMapping(path = "komunikacijaSaReservation")
+    public @ResponseBody TitRegClass komunikacijaSaReservation(){
+
+        Iterable<Tretman> tretman = tretmanRepository.findAll();
+
+        Iterable<Soba> soba = sobaClient.getAllSobe();
+
+        TitRegClass titRegClass = new TitRegClass(tretman,  soba);
+
+        return titRegClass;
+    }
     
 }

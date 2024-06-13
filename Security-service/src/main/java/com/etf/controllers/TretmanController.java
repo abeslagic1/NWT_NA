@@ -1,5 +1,6 @@
 package com.etf.controllers;
 
+import com.etf.dtos.TitRegClass;
 import com.etf.dtos.Tretman;
 import com.etf.feign.TitClient;
 import jakarta.validation.Valid;
@@ -52,6 +53,17 @@ public class TretmanController {
     @DeleteMapping("/{tID}")
     void deleteTretman(@PathVariable int tID) {
         tretmanClient.deleteTretman(tID);
+    }
+
+
+    // komunikacija medju servisima
+
+    @GetMapping(path = "komunikacijaSaReservation")
+    public @ResponseBody TitRegClass komunikacijaSaReservation(){
+
+        TitRegClass titRegClass = tretmanClient.komunikacijaSaReservation();
+
+        return titRegClass;
     }
 
 }

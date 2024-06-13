@@ -6,6 +6,7 @@ import com.etf.model.Krevet;
 import com.etf.model.Pacijent;
 import com.etf.repository.KrevetRepository;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,138 +31,215 @@ public class KrevetController {
     private KrevetRepository krevetRepository;
 
     @PostMapping(path = "/")
-    ResponseEntity<String> addNewKrevet(@RequestBody @Valid KrevetDAO krevetDAO){
+    ResponseEntity<String> addNewKrevet(@RequestBody @Valid KrevetDAO krevetDAO, HttpServletRequest request) throws Exception{
 
-        Krevet k = new Krevet();
+        String ipAddress = request.getRemoteAddr();
 
-        k.setNazivKreveta(krevetDAO.getNazivKreveta());
-        k.setSobaId(krevetDAO.getSobaId());
-        k.setZauzetost(krevetDAO.getZauzetost());
+        if (ipAddress.equals("127.0.0.1")) {
 
-        krevetRepository.save(k);
+            Krevet k = new Krevet();
 
-        return ResponseEntity.ok("Bed has been added.");
+            k.setNazivKreveta(krevetDAO.getNazivKreveta());
+            k.setSobaId(krevetDAO.getSobaId());
+            k.setZauzetost(krevetDAO.getZauzetost());
+
+            krevetRepository.save(k);
+
+            return ResponseEntity.ok("Bed has been added.");
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
+
     }
 
     @GetMapping(path = "/")
-    public @ResponseBody Iterable<Krevet>getAllKreveti(){
-        return krevetRepository.findAll();
+    public @ResponseBody Iterable<Krevet>getAllKreveti(HttpServletRequest request) throws Exception{
+
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            return krevetRepository.findAll();
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
     }
 
     @GetMapping(path = "/GetByNaziv/{nazivKreveta}")
-    public @ResponseBody ResponseEntity<?> getKrevetByNaziv(@PathVariable("nazivKreveta") String nazivKreveta){
+    public @ResponseBody ResponseEntity<?> getKrevetByNaziv(@PathVariable("nazivKreveta") String nazivKreveta, HttpServletRequest request) throws Exception{
 
-        try{
-            Optional<Krevet> krevet = krevetRepository.findByNazivKreveta(nazivKreveta);
+        String ipAddress = request.getRemoteAddr();
 
-            if(krevet.isEmpty()) throw new NotFoundException("Krevet sa tim imenom nije pronadjen.");
+        if (ipAddress.equals("127.0.0.1")) {
 
-            return ResponseEntity.ok(krevet);
-        }catch (NotFoundException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            try{
+                Optional<Krevet> krevet = krevetRepository.findByNazivKreveta(nazivKreveta);
+
+                if(krevet.isEmpty()) throw new NotFoundException("Krevet sa tim imenom nije pronadjen.");
+
+                return ResponseEntity.ok(krevet);
+            }catch (NotFoundException e) {
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            }
         }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     @GetMapping(path = "/GetById/{id}")
-    public @ResponseBody ResponseEntity<?> getKrevetId(@PathVariable("id") Integer id){
+    public @ResponseBody ResponseEntity<?> getKrevetId(@PathVariable("id") Integer id, HttpServletRequest request) throws Exception{
 
-        try {
-            Optional<Krevet> krevet = krevetRepository.findById(id);
 
-            if(krevet.isEmpty()) throw new NotFoundException("Krevet sa tim id-em nije pronadjen");
+        String ipAddress = request.getRemoteAddr();
 
-            return  ResponseEntity.ok(krevet);
-        }catch (NotFoundException e){
+        if (ipAddress.equals("127.0.0.1")) {
 
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            try {
+                Optional<Krevet> krevet = krevetRepository.findById(id);
+
+                if(krevet.isEmpty()) throw new NotFoundException("Krevet sa tim id-em nije pronadjen");
+
+                return  ResponseEntity.ok(krevet);
+            }catch (NotFoundException e){
+
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            }
         }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     @PutMapping(path = "/Naziv/{id}")
-    public @ResponseBody ResponseEntity<String> updateKrevetNaziv(@RequestBody String naziv, @PathVariable("id") Integer id){
+    public @ResponseBody ResponseEntity<String> updateKrevetNaziv(@RequestBody String naziv, @PathVariable("id") Integer id, HttpServletRequest request) throws Exception{
 
-        try{
-            Optional<Krevet> krevet = krevetRepository.findById(id);
 
-            if(krevet.isEmpty()) throw new NotFoundException("Krevet sa tim id-em nije pronadjen.");
-            if(naziv == null || naziv.isEmpty() || naziv.isBlank()) throw new NotFoundException("Naziv ne smije biti prazan string.");
+        String ipAddress = request.getRemoteAddr();
 
-            Krevet krevet1 = krevet.get();
+        if (ipAddress.equals("127.0.0.1")) {
 
-            krevet1.setNazivKreveta(naziv);
+            try{
+                Optional<Krevet> krevet = krevetRepository.findById(id);
 
-            krevetRepository.save(krevet1);
+                if(krevet.isEmpty()) throw new NotFoundException("Krevet sa tim id-em nije pronadjen.");
+                if(naziv == null || naziv.isEmpty() || naziv.isBlank()) throw new NotFoundException("Naziv ne smije biti prazan string.");
 
-            return ResponseEntity.ok("The bed has been successfully updated");
-        }
-        catch (NotFoundException e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-    }
+                Krevet krevet1 = krevet.get();
 
-    @PutMapping(path = "/SobaID/{id}")
-    public @ResponseBody ResponseEntity<String> updateKrevetSobaId(@RequestBody String sobaId, @PathVariable("id") Integer id){
+                krevet1.setNazivKreveta(naziv);
 
-        try{
-            Optional<Krevet> krevet = krevetRepository.findById(id);
-
-            if(krevet.isEmpty()) throw new NotFoundException("Krevet sa tim id-em nije pronadjen.");
-            if(sobaId == null || sobaId.isEmpty() || sobaId.isBlank()) throw new NotFoundException("SobaId ne smije biti prazan string.");
-
-            Krevet krevet1 = krevet.get();
-
-            krevet1.setSobaId(Integer.valueOf(sobaId));
-
-            krevetRepository.save(krevet1);
-
-            return ResponseEntity.ok("The bed has been successfully updated");
-        }
-        catch (NotFoundException e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @PutMapping(path = "/zauzetost/{id}")
-    public @ResponseBody ResponseEntity<String> updateKrevetZauzetost(@RequestBody String zauzetost, @PathVariable("id") Integer id){
-
-        try{
-            Optional<Krevet> krevet = krevetRepository.findById(id);
-
-            if(krevet.isEmpty()) throw new NotFoundException("Krevet sa tim id-em nije pronadjen.");
-            if(zauzetost == null || zauzetost.isEmpty() || zauzetost.isBlank()) throw new NotFoundException("Polje zauzetost ne smije biti prazan string.");
-
-            Krevet krevet1 = krevet.get();
-
-            if(zauzetost.equals("true") || zauzetost.equals("false")){
-                Boolean zauzet = Boolean.valueOf(zauzetost);
-
-                krevet1.setZauzetost(zauzet);
                 krevetRepository.save(krevet1);
 
                 return ResponseEntity.ok("The bed has been successfully updated");
             }
-            return new ResponseEntity<>("Nije ispravna vrijednost boolean-a.", HttpStatus.BAD_REQUEST);
+            catch (NotFoundException e){
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            }
         }
-        catch (NotFoundException e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        else{
+            throw new Exception("Operation not allowed");
         }
+
+    }
+
+    @PutMapping(path = "/SobaID/{id}")
+    public @ResponseBody ResponseEntity<String> updateKrevetSobaId(@RequestBody String sobaId, @PathVariable("id") Integer id, HttpServletRequest request) throws Exception{
+
+
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            try{
+                Optional<Krevet> krevet = krevetRepository.findById(id);
+
+                if(krevet.isEmpty()) throw new NotFoundException("Krevet sa tim id-em nije pronadjen.");
+                if(sobaId == null || sobaId.isEmpty() || sobaId.isBlank()) throw new NotFoundException("SobaId ne smije biti prazan string.");
+
+                Krevet krevet1 = krevet.get();
+
+                krevet1.setSobaId(Integer.valueOf(sobaId));
+
+                krevetRepository.save(krevet1);
+
+                return ResponseEntity.ok("The bed has been successfully updated");
+            }
+            catch (NotFoundException e){
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            }
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
+    }
+
+    @PutMapping(path = "/zauzetost/{id}")
+    public @ResponseBody ResponseEntity<String> updateKrevetZauzetost(@RequestBody String zauzetost, @PathVariable("id") Integer id, HttpServletRequest request) throws Exception{
+
+
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            try{
+                Optional<Krevet> krevet = krevetRepository.findById(id);
+
+                if(krevet.isEmpty()) throw new NotFoundException("Krevet sa tim id-em nije pronadjen.");
+                if(zauzetost == null || zauzetost.isEmpty() || zauzetost.isBlank()) throw new NotFoundException("Polje zauzetost ne smije biti prazan string.");
+
+                Krevet krevet1 = krevet.get();
+
+                if(zauzetost.equals("true") || zauzetost.equals("false")){
+                    Boolean zauzet = Boolean.valueOf(zauzetost);
+
+                    krevet1.setZauzetost(zauzet);
+                    krevetRepository.save(krevet1);
+
+                    return ResponseEntity.ok("The bed has been successfully updated");
+                }
+                return new ResponseEntity<>("Nije ispravna vrijednost boolean-a.", HttpStatus.BAD_REQUEST);
+            }
+            catch (NotFoundException e){
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            }
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     @DeleteMapping(path = "/byId/{id}")
-    public @ResponseBody ResponseEntity<String> deleteKrevetById(@PathVariable("id") Integer id){
+    public @ResponseBody ResponseEntity<String> deleteKrevetById(@PathVariable("id") Integer id, HttpServletRequest request) throws Exception{
 
-        try{
-            Optional<Krevet> krevet = krevetRepository.findById(id);
+        String ipAddress = request.getRemoteAddr();
 
-            if(krevet.isEmpty()) throw new NotFoundException("Krevet sa tim id-em nije pronadjen.");
+        if (ipAddress.equals("127.0.0.1")) {
 
-            krevetRepository.deleteById(id);
+            try{
+                Optional<Krevet> krevet = krevetRepository.findById(id);
 
-            return ResponseEntity.ok("The bed has been successfully deleted");
+                if(krevet.isEmpty()) throw new NotFoundException("Krevet sa tim id-em nije pronadjen.");
+
+                krevetRepository.deleteById(id);
+
+                return ResponseEntity.ok("The bed has been successfully deleted");
+            }
+            catch (NotFoundException e){
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            }
         }
-        catch (NotFoundException e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        else{
+            throw new Exception("Operation not allowed");
         }
+
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

@@ -1,8 +1,10 @@
 package com.etf.controllers;
 
 
+import com.etf.dtos.RegTitClass;
 import com.etf.dtos.Rezervacija;
 import com.etf.dtos.RezervacijaDAO;
+import com.etf.dtos.Tretman;
 import com.etf.exceptions.NotFoundException;
 import com.etf.feign.ReservationClient;
 import jakarta.validation.Valid;
@@ -123,5 +125,14 @@ public class RezervacijaController {
         }catch (NotFoundException e) {
             return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @GetMapping(path = "/komunikacijaSaTit")
+    public @ResponseBody RegTitClass komunikacijaSaTit() {
+
+
+        RegTitClass regTitClass = rezervacijaClient.komunikacijaSaTit();
+
+        return regTitClass;
     }
 }

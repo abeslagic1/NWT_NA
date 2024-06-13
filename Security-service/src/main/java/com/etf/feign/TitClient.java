@@ -110,4 +110,9 @@ public interface TitClient {
 
     @PutMapping("/tit/pacijenti/updatePacijent/{pacID}")
     Pacijent_Nada updatePacijent(@PathVariable int pacID, @RequestBody Pacijent_Nada updatedPacijent);
+
+    // komunikacija sa  tit sa Reservation
+
+    @GetMapping(path = "/tit/tretmani/komunikacijaSaReservation")
+    public @ResponseBody TitRegClass komunikacijaSaReservation();
 }

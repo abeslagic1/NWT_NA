@@ -5,6 +5,7 @@ import com.etf.exceptions.NotFoundException;
 import com.etf.model.Krevet;
 import com.etf.model.Soba;
 import com.etf.repository.SobaRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,144 +31,218 @@ public class SobaController {
     private SobaRepository sobaRepository;
 
     @PostMapping(path = "/")
-    ResponseEntity <String> addNewSoba(@RequestBody @Valid SobaDAO sobaDAO){
+    ResponseEntity <String> addNewSoba(@RequestBody @Valid SobaDAO sobaDAO, HttpServletRequest request) throws Exception{
 
-        Soba s = new Soba();
 
-        s.setNazivSobe(sobaDAO.getNazivSobe());
-        s.setZauzetost(sobaDAO.getZauzetost());
-        s.setPrivateShared(sobaDAO.getPrivateShared());
+        String ipAddress = request.getRemoteAddr();
 
-        sobaRepository.save(s);
-        return ResponseEntity.ok("Room has been added.");
+        if (ipAddress.equals("127.0.0.1")) {
+
+            Soba s = new Soba();
+
+            s.setNazivSobe(sobaDAO.getNazivSobe());
+            s.setZauzetost(sobaDAO.getZauzetost());
+            s.setPrivateShared(sobaDAO.getPrivateShared());
+
+            sobaRepository.save(s);
+            return ResponseEntity.ok("Room has been added.");
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
+
     }
 
     @GetMapping(path = "/")
-    public @ResponseBody Iterable<Soba> getAllSobe(){
+    public @ResponseBody Iterable<Soba> getAllSobe(HttpServletRequest request) throws Exception{
         // This returns a JSON or XML with the users
-        return sobaRepository.findAll();
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            return sobaRepository.findAll();
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     @GetMapping(path = "/GetByNazivSobe/{nazivSobe}")
-    public @ResponseBody ResponseEntity<?> getSobaByNazivSobe(@PathVariable("nazivSobe") String nazivSobe){
+    public @ResponseBody ResponseEntity<?> getSobaByNazivSobe(@PathVariable("nazivSobe") String nazivSobe, HttpServletRequest request) throws Exception{
 
-        try{
-            Optional<Soba> soba = sobaRepository.findByNazivSobe(nazivSobe);
+        String ipAddress = request.getRemoteAddr();
 
-            if(soba.isEmpty()) throw new NotFoundException("Soba sa tim nazivom nije pronadjena.");
+        if (ipAddress.equals("127.0.0.1")) {
 
-            return ResponseEntity.ok(soba);
+            try{
+                Optional<Soba> soba = sobaRepository.findByNazivSobe(nazivSobe);
 
-        }catch (NotFoundException e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+                if(soba.isEmpty()) throw new NotFoundException("Soba sa tim nazivom nije pronadjena.");
+
+                return ResponseEntity.ok(soba);
+
+            }catch (NotFoundException e){
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            }
         }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     @GetMapping(path = "/GetById/{id}")
-    public @ResponseBody ResponseEntity<?> getSobaById(@PathVariable("id") Integer id){
+    public @ResponseBody ResponseEntity<?> getSobaById(@PathVariable("id") Integer id, HttpServletRequest request) throws Exception{
 
-        try{
-            Optional<Soba> soba = sobaRepository.findById(id);
+        String ipAddress = request.getRemoteAddr();
 
-            if(soba.isEmpty()) throw new NotFoundException("Soba sa tim id-em nije pronadjena.");
+        if (ipAddress.equals("127.0.0.1")) {
 
-            return ResponseEntity.ok(soba);
-        }catch (NotFoundException e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            try{
+                Optional<Soba> soba = sobaRepository.findById(id);
+
+                if(soba.isEmpty()) throw new NotFoundException("Soba sa tim id-em nije pronadjena.");
+
+                return ResponseEntity.ok(soba);
+            }catch (NotFoundException e){
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            }
         }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     @PutMapping(path = "/Naziv/{id}")
-    public @ResponseBody ResponseEntity<String> updateSobaNaziv(@RequestBody String naziv, @PathVariable("id") Integer id) {
+    public @ResponseBody ResponseEntity<String> updateSobaNaziv(@RequestBody String naziv, @PathVariable("id") Integer id, HttpServletRequest request) throws Exception {
 
-        try {
-            Optional<Soba> soba = sobaRepository.findById(id);
+        String ipAddress = request.getRemoteAddr();
 
-            if (soba.isEmpty()) throw new NotFoundException("Soba sa tim id-em nije pronadjen.");
-            if (naziv == null || naziv.isEmpty() || naziv.isBlank())
-                throw new NotFoundException("Naziv ne smije biti prazan string.");
+        if (ipAddress.equals("127.0.0.1")) {
 
-            Soba soba1 = soba.get();
+            try {
+                Optional<Soba> soba = sobaRepository.findById(id);
 
-            soba1.setNazivSobe(naziv);
+                if (soba.isEmpty()) throw new NotFoundException("Soba sa tim id-em nije pronadjen.");
+                if (naziv == null || naziv.isEmpty() || naziv.isBlank())
+                    throw new NotFoundException("Naziv ne smije biti prazan string.");
 
-            sobaRepository.save(soba1);
+                Soba soba1 = soba.get();
 
-            return ResponseEntity.ok("The room has been successfully updated");
-        } catch (NotFoundException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+                soba1.setNazivSobe(naziv);
+
+                sobaRepository.save(soba1);
+
+                return ResponseEntity.ok("The room has been successfully updated");
+            } catch (NotFoundException e) {
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            }
         }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
 
     @PutMapping(path = "/zauzetost/{id}")
-    public @ResponseBody ResponseEntity<String> updateSobaZauzetost(@RequestBody String zauzetost, @PathVariable("id") Integer id){
+    public @ResponseBody ResponseEntity<String> updateSobaZauzetost(@RequestBody String zauzetost, @PathVariable("id") Integer id, HttpServletRequest request) throws Exception{
 
-        try{
-            Optional<Soba> soba = sobaRepository.findById(id);
+        String ipAddress = request.getRemoteAddr();
 
-            if(soba.isEmpty()) throw new NotFoundException("Soba sa tim id-em nije pronadjen.");
-            if(zauzetost == null || zauzetost.isEmpty() || zauzetost.isBlank()) throw new NotFoundException("Polje zauzetost ne smije biti prazan string.");
+        if (ipAddress.equals("127.0.0.1")) {
 
-            Soba soba1 = soba.get();
+            try{
+                Optional<Soba> soba = sobaRepository.findById(id);
 
-            if(zauzetost.equals("true") || zauzetost.equals("false")){
-                Boolean zauzet = Boolean.valueOf(zauzetost);
+                if(soba.isEmpty()) throw new NotFoundException("Soba sa tim id-em nije pronadjen.");
+                if(zauzetost == null || zauzetost.isEmpty() || zauzetost.isBlank()) throw new NotFoundException("Polje zauzetost ne smije biti prazan string.");
 
-                soba1.setZauzetost(zauzet);
-                sobaRepository.save(soba1);
+                Soba soba1 = soba.get();
 
-                return ResponseEntity.ok("The room has been successfully updated");
+                if(zauzetost.equals("true") || zauzetost.equals("false")){
+                    Boolean zauzet = Boolean.valueOf(zauzetost);
+
+                    soba1.setZauzetost(zauzet);
+                    sobaRepository.save(soba1);
+
+                    return ResponseEntity.ok("The room has been successfully updated");
+                }
+                return new ResponseEntity<>("Nije ispravna vrijednost boolean-a.", HttpStatus.BAD_REQUEST);
             }
-            return new ResponseEntity<>("Nije ispravna vrijednost boolean-a.", HttpStatus.BAD_REQUEST);
+            catch (NotFoundException e){
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            }
         }
-        catch (NotFoundException e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        else{
+            throw new Exception("Operation not allowed");
         }
+
     }
 
 
     @PutMapping(path = "/privateShared/{id}")
-    public @ResponseBody ResponseEntity<String> updateSobaPrivateShared(@RequestBody String privateShared, @PathVariable("id") Integer id){
+    public @ResponseBody ResponseEntity<String> updateSobaPrivateShared(@RequestBody String privateShared, @PathVariable("id") Integer id, HttpServletRequest request) throws Exception{
 
-        try{
-            Optional<Soba> soba = sobaRepository.findById(id);
+        String ipAddress = request.getRemoteAddr();
 
-            if(soba.isEmpty()) throw new NotFoundException("Soba sa tim id-em nije pronadjen.");
-            if(privateShared == null || privateShared.isEmpty() || privateShared.isBlank()) throw new NotFoundException("Private/Shared ne smije biti prazan string.");
+        if (ipAddress.equals("127.0.0.1")) {
 
-            Soba soba1 = soba.get();
+            try{
+                Optional<Soba> soba = sobaRepository.findById(id);
 
-            if(privateShared.equals("S") || privateShared.equals("P")){
-                soba1.setPrivateShared(privateShared);
+                if(soba.isEmpty()) throw new NotFoundException("Soba sa tim id-em nije pronadjen.");
+                if(privateShared == null || privateShared.isEmpty() || privateShared.isBlank()) throw new NotFoundException("Private/Shared ne smije biti prazan string.");
 
-                sobaRepository.save(soba1);
+                Soba soba1 = soba.get();
 
-                return ResponseEntity.ok("The room has been successfully updated");
+                if(privateShared.equals("S") || privateShared.equals("P")){
+                    soba1.setPrivateShared(privateShared);
+
+                    sobaRepository.save(soba1);
+
+                    return ResponseEntity.ok("The room has been successfully updated");
+                }
+
+                return new ResponseEntity<>("Nije unesena ispravna vrijednost za polje Private/Shared. Unesite P ili S.", HttpStatus.BAD_REQUEST);
             }
+            catch (NotFoundException e){
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            }
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
 
-            return new ResponseEntity<>("Nije unesena ispravna vrijednost za polje Private/Shared. Unesite P ili S.", HttpStatus.BAD_REQUEST);
-        }
-        catch (NotFoundException e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
     }
 
     @DeleteMapping(path = "/byId/{id}")
-    public @ResponseBody ResponseEntity<String> deleteSobaById(@PathVariable("id") Integer id){
+    public @ResponseBody ResponseEntity<String> deleteSobaById(@PathVariable("id") Integer id, HttpServletRequest request) throws Exception{
 
-        try{
-            Optional<Soba> soba = sobaRepository.findById(id);
+        String ipAddress = request.getRemoteAddr();
 
-            if(soba.isEmpty()) throw new NotFoundException("Soba sa tim id-em nije pronadjen.");
+        if (ipAddress.equals("127.0.0.1")) {
 
-            sobaRepository.deleteById(id);
+            try{
+                Optional<Soba> soba = sobaRepository.findById(id);
 
-            return ResponseEntity.ok("The room has been successfully deleted");
+                if(soba.isEmpty()) throw new NotFoundException("Soba sa tim id-em nije pronadjen.");
+
+                sobaRepository.deleteById(id);
+
+                return ResponseEntity.ok("The room has been successfully deleted");
+            }
+            catch (NotFoundException e){
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            }
         }
-        catch (NotFoundException e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        else{
+            throw new Exception("Operation not allowed");
         }
+
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

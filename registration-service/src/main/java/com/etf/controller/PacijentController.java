@@ -7,6 +7,7 @@ import com.etf.exceptions.NotFoundException;
 import com.etf.model.Pacijent;
 import com.etf.repository.PacijentRepository;
 import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,156 +37,238 @@ public class PacijentController {
 
 
     @PostMapping(path = "/")
-    ResponseEntity <String> addNewPacijent(@RequestBody @Valid PacijentDAO pacijentDAO) {
+    ResponseEntity <String> addNewPacijent(@RequestBody @Valid PacijentDAO pacijentDAO, HttpServletRequest request) throws Exception {
 
-        Pacijent p = new Pacijent();
+        String ipAddress = request.getRemoteAddr();
 
-        p.setIme(pacijentDAO.getIme());
-        p.setPrezime(pacijentDAO.getPrezime());
-        p.setSamUSobi(pacijentDAO.getSamUSobi());
+        if (ipAddress.equals("127.0.0.1")) {
 
-        pacijentRepository.save(p);
 
-        return ResponseEntity.ok("The patient has been successfully added.");
+            Pacijent p = new Pacijent();
+
+            p.setIme(pacijentDAO.getIme());
+            p.setPrezime(pacijentDAO.getPrezime());
+            p.setSamUSobi(pacijentDAO.getSamUSobi());
+
+            pacijentRepository.save(p);
+
+            return ResponseEntity.ok("The patient has been successfully added.");
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     @GetMapping(path = "/")
-    public @ResponseBody Iterable<Pacijent> getAllPacijents(){
+    public @ResponseBody Iterable<Pacijent> getAllPacijents(HttpServletRequest request) throws Exception{
         //This returns a JSON or XML with the pacijents
-        return pacijentRepository.findAll();
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            return pacijentRepository.findAll();
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     @GetMapping(path = "/GetByIme/{ime}")
-    public @ResponseBody ResponseEntity<?> getPacijentName(@PathVariable("ime") String ime){
+    public @ResponseBody ResponseEntity<?> getPacijentName(@PathVariable("ime") String ime, HttpServletRequest request) throws Exception{
 
-        try{
-            Pacijent pacijent = pacijentRepository.findByIme(ime);
+        String ipAddress = request.getRemoteAddr();
 
-            if (pacijent == null) throw new NotFoundException("Pacijent pod tim imenom nije pronadjen.");
+        if (ipAddress.equals("127.0.0.1")) {
 
-            return ResponseEntity.ok(pacijent);
-        }catch (NotFoundException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            try{
+                Pacijent pacijent = pacijentRepository.findByIme(ime);
+
+                if (pacijent == null) throw new NotFoundException("Pacijent pod tim imenom nije pronadjen.");
+
+                return ResponseEntity.ok(pacijent);
+            }catch (NotFoundException e) {
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            }
         }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     @GetMapping(path = "/GetById/{id}")
-    public @ResponseBody ResponseEntity<?> getPacijentId(@PathVariable("id") Integer id){
+    public @ResponseBody ResponseEntity<?> getPacijentId(@PathVariable("id") Integer id, HttpServletRequest request) throws Exception{
 
-        try{
-            Optional<Pacijent> pacijent = pacijentRepository.findById(id);
+        String ipAddress = request.getRemoteAddr();
 
-            if(pacijent.isEmpty()) throw new NotFoundException("Pacijent pod tim id-em nije pronadjen.");
+        if (ipAddress.equals("127.0.0.1")) {
 
-            return ResponseEntity.ok(pacijent);
-        }catch (NotFoundException e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            try{
+                Optional<Pacijent> pacijent = pacijentRepository.findById(id);
+
+                if(pacijent.isEmpty()) throw new NotFoundException("Pacijent pod tim id-em nije pronadjen.");
+
+                return ResponseEntity.ok(pacijent);
+            }catch (NotFoundException e){
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            }
         }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     @PutMapping(path = "/Ime/{id}")
-    public @ResponseBody ResponseEntity<String> updatePacijentIme(@RequestBody String ime, @PathVariable("id") Integer id){
+    public @ResponseBody ResponseEntity<String> updatePacijentIme(@RequestBody String ime, @PathVariable("id") Integer id, HttpServletRequest request) throws Exception{
 
-        try{
-            Optional<Pacijent> pacijent = pacijentRepository.findById(id);
+        String ipAddress = request.getRemoteAddr();
 
-            if(pacijent.isEmpty()) throw new NotFoundException("Pacijent sa tim id-em nije pronadjen.");
-            if(ime == null || ime.isEmpty() || ime.isBlank()) throw new NotFoundException("Ime ne smije biti prazan string.");
+        if (ipAddress.equals("127.0.0.1")) {
 
-            Pacijent pacijent1 = pacijent.get();
+            try{
+                Optional<Pacijent> pacijent = pacijentRepository.findById(id);
 
-            pacijent1.setIme(ime);
+                if(pacijent.isEmpty()) throw new NotFoundException("Pacijent sa tim id-em nije pronadjen.");
+                if(ime == null || ime.isEmpty() || ime.isBlank()) throw new NotFoundException("Ime ne smije biti prazan string.");
 
-            pacijentRepository.save(pacijent1);
+                Pacijent pacijent1 = pacijent.get();
 
-            return ResponseEntity.ok("The patient has been successfully updated");
-        }
-        catch (NotFoundException e){
-            return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-    }
+                pacijent1.setIme(ime);
 
-    @PutMapping(path = "/Prezime/{id}")
-    public @ResponseBody ResponseEntity<String> updatePacijentPrezime(@RequestBody String prezime, @PathVariable("id") Integer id){
-
-        try{
-            Optional<Pacijent> pacijent = pacijentRepository.findById(id);
-
-            if(pacijent.isEmpty()) throw new NotFoundException("Pacijent sa tim id-em nije pronadjen.");
-            if(prezime == null || prezime.isEmpty() || prezime.isBlank()) throw new NotFoundException("Prezime ne smije biti prazan string.");
-
-            Pacijent pacijent1 = pacijent.get();
-
-            pacijent1.setPrezime(prezime);
-
-            pacijentRepository.save(pacijent1);
-
-            return ResponseEntity.ok("The patient has been successfully updated");
-        }
-        catch (NotFoundException e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @PutMapping(path = "/samUSobi/{id}")
-    public @ResponseBody ResponseEntity<String> updatePacijentSamUSobi(@RequestBody String samUsobi, @PathVariable("id") Integer id){
-
-        try{
-            Optional<Pacijent> pacijent = pacijentRepository.findById(id);
-
-            if(pacijent.isEmpty()) throw new NotFoundException("Pacijent sa tim id-em nije pronadjen.");
-            if(samUsobi == null || samUsobi.isEmpty() || samUsobi.isBlank()) throw new NotFoundException("Polje sam u sobi ne smije biti prazan string.");
-
-            Pacijent pacijent1 = pacijent.get();
-
-            if(samUsobi.equals("true") || samUsobi.equals("false")){
-                Boolean boo = Boolean.valueOf(samUsobi);
-
-                pacijent1.setSamUSobi(boo);
                 pacijentRepository.save(pacijent1);
 
                 return ResponseEntity.ok("The patient has been successfully updated");
             }
-            return new ResponseEntity<>("Nije ispravna vrijednost boolean-a.", HttpStatus.BAD_REQUEST);
+            catch (NotFoundException e){
+                return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            }
         }
-        catch (NotFoundException e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        else{
+            throw new Exception("Operation not allowed");
         }
+
+    }
+
+    @PutMapping(path = "/Prezime/{id}")
+    public @ResponseBody ResponseEntity<String> updatePacijentPrezime(@RequestBody String prezime, @PathVariable("id") Integer id, HttpServletRequest request) throws Exception{
+
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            try{
+                Optional<Pacijent> pacijent = pacijentRepository.findById(id);
+
+                if(pacijent.isEmpty()) throw new NotFoundException("Pacijent sa tim id-em nije pronadjen.");
+                if(prezime == null || prezime.isEmpty() || prezime.isBlank()) throw new NotFoundException("Prezime ne smije biti prazan string.");
+
+                Pacijent pacijent1 = pacijent.get();
+
+                pacijent1.setPrezime(prezime);
+
+                pacijentRepository.save(pacijent1);
+
+                return ResponseEntity.ok("The patient has been successfully updated");
+            }
+            catch (NotFoundException e){
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            }
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
+    }
+
+    @PutMapping(path = "/samUSobi/{id}")
+    public @ResponseBody ResponseEntity<String> updatePacijentSamUSobi(@RequestBody String samUsobi, @PathVariable("id") Integer id, HttpServletRequest request) throws Exception{
+
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            try{
+                Optional<Pacijent> pacijent = pacijentRepository.findById(id);
+
+                if(pacijent.isEmpty()) throw new NotFoundException("Pacijent sa tim id-em nije pronadjen.");
+                if(samUsobi == null || samUsobi.isEmpty() || samUsobi.isBlank()) throw new NotFoundException("Polje sam u sobi ne smije biti prazan string.");
+
+                Pacijent pacijent1 = pacijent.get();
+
+                if(samUsobi.equals("true") || samUsobi.equals("false")){
+                    Boolean boo = Boolean.valueOf(samUsobi);
+
+                    pacijent1.setSamUSobi(boo);
+                    pacijentRepository.save(pacijent1);
+
+                    return ResponseEntity.ok("The patient has been successfully updated");
+                }
+                return new ResponseEntity<>("Nije ispravna vrijednost boolean-a.", HttpStatus.BAD_REQUEST);
+            }
+            catch (NotFoundException e){
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            }
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     @DeleteMapping(path = "/byId/{id}")
-    public @ResponseBody ResponseEntity<String> deletePacijentById(@PathVariable("id") Integer id){
+    public @ResponseBody ResponseEntity<String> deletePacijentById(@PathVariable("id") Integer id, HttpServletRequest request) throws Exception{
 
-        try{
-            Optional<Pacijent> pacijent = pacijentRepository.findById(id);
+        String ipAddress = request.getRemoteAddr();
 
-            if(pacijent.isEmpty()) throw new NotFoundException("Pacijent sa tim id-em nije pronadjen.");
+        if (ipAddress.equals("127.0.0.1")) {
 
-            pacijentRepository.deleteById(id);
+            try{
+                Optional<Pacijent> pacijent = pacijentRepository.findById(id);
 
-            return ResponseEntity.ok("The patient has been successfully deleted");
+                if(pacijent.isEmpty()) throw new NotFoundException("Pacijent sa tim id-em nije pronadjen.");
+
+                pacijentRepository.deleteById(id);
+
+                return ResponseEntity.ok("The patient has been successfully deleted");
+            }
+            catch (NotFoundException e){
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            }
         }
-        catch (NotFoundException e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        else{
+            throw new Exception("Operation not allowed");
         }
+
     }
 
     //Delete by Ime nema rezona jer ime nije jedinstveno, tako da se ovo nece ni koristit.
     @DeleteMapping(path = "/byIme/{ime}")
-    public @ResponseBody ResponseEntity<String> deletePacijentByIme(@PathVariable("ime") String ime) {
+    public @ResponseBody ResponseEntity<String> deletePacijentByIme(@PathVariable("ime") String ime, HttpServletRequest request) throws Exception {
 
-        try {
-            Pacijent pacijent = pacijentRepository.findByIme(ime);
+        String ipAddress = request.getRemoteAddr();
 
-            if (pacijent == null) throw new NotFoundException("Pacijent sa tim id-em nije pronadjen.");
+        if (ipAddress.equals("127.0.0.1")) {
 
-            Integer id = pacijent.getId();
-            pacijentRepository.deleteById(id);
+            try {
+                Pacijent pacijent = pacijentRepository.findByIme(ime);
 
-            return ResponseEntity.ok("The patient has been successfully deleted");
-        } catch (NotFoundException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+                if (pacijent == null) throw new NotFoundException("Pacijent sa tim id-em nije pronadjen.");
+
+                Integer id = pacijent.getId();
+                pacijentRepository.deleteById(id);
+
+                return ResponseEntity.ok("The patient has been successfully deleted");
+            } catch (NotFoundException e) {
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            }
         }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

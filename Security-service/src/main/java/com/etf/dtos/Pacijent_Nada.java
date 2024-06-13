@@ -11,7 +11,7 @@ import java.util.Objects;
 
 @Data
 @Entity
-@Table(name = "Pacijent")
+@Table(name = "Pacijent_Nada")
 public class Pacijent_Nada {
 
     @Id

@@ -142,4 +142,9 @@ public interface ReservationClient {
     public @ResponseBody ResponseEntity<String> deleteSobaById(@PathVariable("id") Integer id);
 
 
+    //ZA KOMUNIKACIJU REGISTRATION / TIT
+
+    @GetMapping(path = "/Reservation/Rezervacija/komunikacijaSaTit")
+    public @ResponseBody RegTitClass komunikacijaSaTit();
+
 }
