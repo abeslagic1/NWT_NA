@@ -1,5 +1,6 @@
 package com.example.tit.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.validation.annotation.Validated;
 //import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -23,49 +24,103 @@ public class TerminController {
     }
 
     @GetMapping("/")
-    Iterable<Termin> allTermin() {
-        return terminRepository.findAll();
+    Iterable<Termin> allTermin(HttpServletRequest request) throws Exception {
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            return terminRepository.findAll();
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
     
     @PostMapping("/")
-    Termin newTermin(@RequestBody Termin newTermin) {
-        return terminRepository.save(newTermin);
+    Termin newTermin(@RequestBody Termin newTermin, HttpServletRequest request) throws Exception {
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            return terminRepository.save(newTermin);
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     @GetMapping("/{id}")
-    Termin oneTermin(@PathVariable int id) {
-        return terminRepository.findById(id).orElseThrow(() -> new TerminNotFoundException(id));
+    Termin oneTermin(@PathVariable int id, HttpServletRequest request) throws Exception {
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            return terminRepository.findById(id).orElseThrow(() -> new TerminNotFoundException(id));
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     @PostMapping("/{id}")
-    Termin replaceTermin(@RequestBody Termin newTermin, @PathVariable int id) {
-        return terminRepository.findById(id).map(termin -> {
-            termin.setKomentar(newTermin.getKomentar());
-            termin.setStatus(newTermin.getStatus());
-            return terminRepository.save(termin);
-        }).orElseGet(() -> {
-            newTermin.setID(id);
-            return terminRepository.save(newTermin);
-        });
+    Termin replaceTermin(@RequestBody Termin newTermin, @PathVariable int id, HttpServletRequest request) throws Exception {
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            return terminRepository.findById(id).map(termin -> {
+                termin.setKomentar(newTermin.getKomentar());
+                termin.setStatus(newTermin.getStatus());
+                return terminRepository.save(termin);
+            }).orElseGet(() -> {
+                newTermin.setID(id);
+                return terminRepository.save(newTermin);
+            });
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     @DeleteMapping("/{id}")
-    void deleteTermin(@PathVariable int id) {
-        terminRepository.deleteById(id);
+    void deleteTermin(@PathVariable int id, HttpServletRequest request) throws Exception {
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            terminRepository.deleteById(id);
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
 
     @PutMapping("/updateTermin/{id}")
-    Termin updateTermin(@PathVariable int id, @RequestBody Termin updatedTermin) {
-        return terminRepository.findById(id).map(termin -> {
-            if (updatedTermin.getKomentar() != null) {
-                termin.setKomentar(updatedTermin.getKomentar());
-            }
-            if (updatedTermin.getStatus() != null) {
-                termin.setStatus(updatedTermin.getStatus());
-            }
-            return terminRepository.save(termin);
-        }).orElseThrow(() -> new TerminNotFoundException(id));
+    Termin updateTermin(@PathVariable int id, @RequestBody Termin updatedTermin, HttpServletRequest request) throws Exception {
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            return terminRepository.findById(id).map(termin -> {
+                if (updatedTermin.getKomentar() != null) {
+                    termin.setKomentar(updatedTermin.getKomentar());
+                }
+                if (updatedTermin.getStatus() != null) {
+                    termin.setStatus(updatedTermin.getStatus());
+                }
+                return terminRepository.save(termin);
+            }).orElseThrow(() -> new TerminNotFoundException(id));
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
 

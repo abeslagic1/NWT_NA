@@ -3,6 +3,7 @@ package com.example.tit.controller;
 import com.example.tit.Feign.ReservationClient;
 import com.example.tit.dto.Soba;
 import com.example.tit.model.TitRegClass;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -29,37 +30,82 @@ public class TretmanController {
     }
 
     @GetMapping("/")
-    Iterable<Tretman> allTretmani() {
-        return tretmanRepository.findAll();
+    Iterable<Tretman> allTretmani(HttpServletRequest request) throws Exception {
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            return tretmanRepository.findAll();
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     @PostMapping("/")
-    Tretman newTretman(@Valid @RequestBody Tretman newTretman) {
-        return tretmanRepository.save(newTretman);
+    Tretman newTretman(@Valid @RequestBody Tretman newTretman, HttpServletRequest request) throws Exception {
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            return tretmanRepository.save(newTretman);
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     @GetMapping("/{tID}")
-    Tretman oneTretman(@PathVariable int tID) {
-        return tretmanRepository.findById(tID)
-        .orElseThrow(() -> new TretmanNotFoundException(tID));
+    Tretman oneTretman(@PathVariable int tID, HttpServletRequest request) throws Exception {
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            return tretmanRepository.findById(tID)
+                    .orElseThrow(() -> new TretmanNotFoundException(tID));
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     @PutMapping("/{tID}")
-    Tretman replaceTretman(@RequestBody Tretman newTretman, @PathVariable int tID) {
-        return tretmanRepository.findById(tID)
-        .map(tretman -> {
-            tretman.setNaziv(newTretman.getNaziv());
-            tretman.setOpis(newTretman.getOpis());
-            return tretmanRepository.save(tretman);
-        }).orElseGet(() ->  {
-            newTretman.setID(tID);
-            return tretmanRepository.save(newTretman);
-        });
+    Tretman replaceTretman(@RequestBody Tretman newTretman, @PathVariable int tID, HttpServletRequest request) throws Exception {
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            return tretmanRepository.findById(tID)
+                    .map(tretman -> {
+                        tretman.setNaziv(newTretman.getNaziv());
+                        tretman.setOpis(newTretman.getOpis());
+                        return tretmanRepository.save(tretman);
+                    }).orElseGet(() ->  {
+                        newTretman.setID(tID);
+                        return tretmanRepository.save(newTretman);
+                    });
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     @DeleteMapping("/{tID}")
-    void deleteTretman(@PathVariable int tID) {
-        tretmanRepository.deleteById(tID);
+    void deleteTretman(@PathVariable int tID, HttpServletRequest request) throws Exception {
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            tretmanRepository.deleteById(tID);
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
 

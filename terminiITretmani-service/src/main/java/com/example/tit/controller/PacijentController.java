@@ -1,5 +1,6 @@
 package com.example.tit.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 //import org.springframework.stereotype.Controller;
@@ -41,8 +42,17 @@ public class PacijentController {
     }
 
     @GetMapping("/")
-    Iterable<Pacijent_Nada> allPacijenti() {
-        return pacijentRepository.findAll();
+    Iterable<Pacijent_Nada> allPacijenti(HttpServletRequest request) throws Exception {
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            return pacijentRepository.findAll();
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     // @GetMapping("/{ime}")
@@ -75,44 +85,89 @@ public class PacijentController {
 
 
     @PostMapping("/")
-    Pacijent_Nada newPacijent(@Valid @RequestBody Pacijent_Nada newPacijentNada) {
-        return pacijentRepository.save(newPacijentNada);
+    Pacijent_Nada newPacijent(@Valid @RequestBody Pacijent_Nada newPacijentNada, HttpServletRequest request) throws Exception {
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            return pacijentRepository.save(newPacijentNada);
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     @GetMapping("/{pacID}")
-    Pacijent_Nada onePacijent(@PathVariable int pacID) {
-        return pacijentRepository.findById(pacID).orElseThrow(() -> new PacijentNotFoundException(pacID));
+    Pacijent_Nada onePacijent(@PathVariable int pacID, HttpServletRequest request) throws Exception {
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            return pacijentRepository.findById(pacID).orElseThrow(() -> new PacijentNotFoundException(pacID));
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     @PutMapping("/replacePacijent/{pacID}")
-    Pacijent_Nada replacePacijent(@RequestBody Pacijent_Nada newPacijentNada, @PathVariable int pacID) {
-        return pacijentRepository.findById(pacID).map(pacijent -> {
-            pacijent.setIme(newPacijentNada.getIme());
-            pacijent.setPrezime((newPacijentNada.getPrezime()));
-            return pacijentRepository.save(pacijent);
-        })
-        .orElseGet(() -> {
-            newPacijentNada.setID(pacID);
-            return pacijentRepository.save(newPacijentNada);
-        });
+    Pacijent_Nada replacePacijent(@RequestBody Pacijent_Nada newPacijentNada, @PathVariable int pacID, HttpServletRequest request) throws Exception {
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            return pacijentRepository.findById(pacID).map(pacijent -> {
+                        pacijent.setIme(newPacijentNada.getIme());
+                        pacijent.setPrezime((newPacijentNada.getPrezime()));
+                        return pacijentRepository.save(pacijent);
+                    })
+                    .orElseGet(() -> {
+                        newPacijentNada.setID(pacID);
+                        return pacijentRepository.save(newPacijentNada);
+                    });
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     @DeleteMapping("/{pacID}")
-    void deletePacijent(@PathVariable int pacID) {
-        pacijentRepository.deleteById(pacID);
+    void deletePacijent(@PathVariable int pacID, HttpServletRequest request) throws Exception {
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            pacijentRepository.deleteById(pacID);
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     @PutMapping("/updatePacijent/{pacID}")
-    Pacijent_Nada updatePacijent(@PathVariable int pacID, @RequestBody Pacijent_Nada updatedPacijentNada) {
-        return pacijentRepository.findById(pacID).map(pacijent -> {
-            if (updatedPacijentNada.getIme() != null) {
-                pacijent.setIme(updatedPacijentNada.getIme());
-            }
-            if (updatedPacijentNada.getPrezime() != null) {
-                pacijent.setPrezime(updatedPacijentNada.getPrezime());
-            }
-            return pacijentRepository.save(pacijent);
-        }).orElseThrow(() -> new DoctorNotFoundException(pacID));
+    Pacijent_Nada updatePacijent(@PathVariable int pacID, @RequestBody Pacijent_Nada updatedPacijentNada, HttpServletRequest request) throws Exception {
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            return pacijentRepository.findById(pacID).map(pacijent -> {
+                if (updatedPacijentNada.getIme() != null) {
+                    pacijent.setIme(updatedPacijentNada.getIme());
+                }
+                if (updatedPacijentNada.getPrezime() != null) {
+                    pacijent.setPrezime(updatedPacijentNada.getPrezime());
+                }
+                return pacijentRepository.save(pacijent);
+            }).orElseThrow(() -> new DoctorNotFoundException(pacID));
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     //@PostMapping(path = "/addPacijent")

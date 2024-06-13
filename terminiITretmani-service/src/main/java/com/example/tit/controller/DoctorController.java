@@ -2,6 +2,7 @@ package com.example.tit.controller;
 
 //import org.springframework.http.HttpStatus;
 //import org.springframework.http.ResponseEntity;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -39,20 +40,47 @@ public class DoctorController<JsonPatch> {
     }
 
     @GetMapping(path = "/")
-    Iterable<Doctor> all() {
-        return doctorRepository.findAll();
+    Iterable<Doctor> all(HttpServletRequest request) throws Exception {
+
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            return doctorRepository.findAll();
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     @PostMapping(path = "/")
-    Doctor newDoctor(@Valid @RequestBody Doctor newDoctor) {
+    Doctor newDoctor(@Valid @RequestBody Doctor newDoctor, HttpServletRequest request) throws Exception {
 
-        return doctorRepository.save(newDoctor);
-//        return ResponseEntity.ok("Doktor je dodan.");
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            return doctorRepository.save(newDoctor);
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     @GetMapping("/{docID}")
-    Doctor one(@PathVariable int docID) {
-        return doctorRepository.findById(docID).orElseThrow(() -> new DoctorNotFoundException(docID));
+    Doctor one(@PathVariable int docID, HttpServletRequest request) throws Exception {
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            return doctorRepository.findById(docID).orElseThrow(() -> new DoctorNotFoundException(docID));
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     // @GetMapping("/{ime}")
@@ -84,39 +112,68 @@ public class DoctorController<JsonPatch> {
     // }
 
     @PutMapping("/replaceDoctor/{docID}")
-    Doctor replaceDoctor(@RequestBody Doctor newDoctor, @PathVariable int docID) {
+    Doctor replaceDoctor(@RequestBody Doctor newDoctor, @PathVariable int docID, HttpServletRequest request) throws Exception {
 
-        return doctorRepository.findById(docID).map(doctor -> {
-            doctor.setName(newDoctor.getName());
-            doctor.setSurrname(newDoctor.getSurrname());
-            doctor.setSpecialization(newDoctor.getSpecialization());
-            return doctorRepository.save(doctor);
-        })
-        .orElseGet(() -> {
-            newDoctor.setID(docID);
-            return doctorRepository.save(newDoctor);
-        });
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            return doctorRepository.findById(docID).map(doctor -> {
+                        doctor.setName(newDoctor.getName());
+                        doctor.setSurrname(newDoctor.getSurrname());
+                        doctor.setSpecialization(newDoctor.getSpecialization());
+                        return doctorRepository.save(doctor);
+                    })
+                    .orElseGet(() -> {
+                        newDoctor.setID(docID);
+                        return doctorRepository.save(newDoctor);
+                    });
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
+
     }
 
     @DeleteMapping("/{docID}")
-    void deleteDoctor(@PathVariable int docID) {
-        doctorRepository.deleteById(docID);
+    void deleteDoctor(@PathVariable int docID, HttpServletRequest request) throws Exception {
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            doctorRepository.deleteById(docID);
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     @PutMapping("/updateDoctor/{docID}")
-    Doctor updateDoctor(@PathVariable int docID, @RequestBody Doctor updatedDoctor) {
-        return doctorRepository.findById(docID).map(doctor -> {
-            if (updatedDoctor.getName() != null) {
-                doctor.setName(updatedDoctor.getName());
-            }
-            if (updatedDoctor.getSurrname() != null) {
-                doctor.setSurrname(updatedDoctor.getSurrname());
-            }
-            if (updatedDoctor.getSpecialization() != null) {
-                doctor.setSpecialization(updatedDoctor.getSpecialization());
-            }
-            return doctorRepository.save(doctor);
-        }).orElseThrow(() -> new DoctorNotFoundException(docID));
+    Doctor updateDoctor(@PathVariable int docID, @RequestBody Doctor updatedDoctor, HttpServletRequest request) throws Exception {
+
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            return doctorRepository.findById(docID).map(doctor -> {
+                if (updatedDoctor.getName() != null) {
+                    doctor.setName(updatedDoctor.getName());
+                }
+                if (updatedDoctor.getSurrname() != null) {
+                    doctor.setSurrname(updatedDoctor.getSurrname());
+                }
+                if (updatedDoctor.getSpecialization() != null) {
+                    doctor.setSpecialization(updatedDoctor.getSpecialization());
+                }
+                return doctorRepository.save(doctor);
+            }).orElseThrow(() -> new DoctorNotFoundException(docID));
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }   
 }
 

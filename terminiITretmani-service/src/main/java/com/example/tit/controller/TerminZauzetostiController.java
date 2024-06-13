@@ -1,5 +1,6 @@
 package com.example.tit.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 
@@ -38,37 +39,82 @@ public class TerminZauzetostiController {
     }
 
     @GetMapping("/")
-    Iterable<TerminZauzetosti> allTZ() {
-        return terminZauzetostiRepository.findAll();
+    Iterable<TerminZauzetosti> allTZ(HttpServletRequest request) throws Exception {
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            return terminZauzetostiRepository.findAll();
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     @PostMapping("/")
-    TerminZauzetosti terminZauzetosti(@Valid @RequestBody TerminZauzetosti newTerminZauzetosti) {
-        return terminZauzetostiRepository.save(newTerminZauzetosti);
+    TerminZauzetosti terminZauzetosti(@Valid @RequestBody TerminZauzetosti newTerminZauzetosti, HttpServletRequest request) throws Exception {
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            return terminZauzetostiRepository.save(newTerminZauzetosti);
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     @GetMapping("/{tzID}")
-    TerminZauzetosti oneTZ(@PathVariable int tzID) {
-        return terminZauzetostiRepository.findById(tzID).orElseThrow(() -> new TerminZauzetostiNotFoundException(tzID));
+    TerminZauzetosti oneTZ(@PathVariable int tzID, HttpServletRequest request) throws Exception {
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            return terminZauzetostiRepository.findById(tzID).orElseThrow(() -> new TerminZauzetostiNotFoundException(tzID));
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     @PutMapping("/{tzID}")
-    TerminZauzetosti replaceTerminZauzetosti(@RequestBody TerminZauzetosti newTerminZauzetosti, @PathVariable int tzID) {
-        return terminZauzetostiRepository.findById(tzID).map(terminZauzetosti -> {
-            terminZauzetosti.setDatumTretmana(newTerminZauzetosti.getDatumTretmana());
-            terminZauzetosti.setVrijemePocetka(newTerminZauzetosti.getVrijemePocetka());
-            terminZauzetosti.setVrijemeKraja(newTerminZauzetosti.getVrijemeKraja());
-            return terminZauzetostiRepository.save(terminZauzetosti);
-        })
-        .orElseGet(() -> {
-            newTerminZauzetosti.setID(tzID);
-            return terminZauzetostiRepository.save(newTerminZauzetosti);
-        });
+    TerminZauzetosti replaceTerminZauzetosti(@RequestBody TerminZauzetosti newTerminZauzetosti, @PathVariable int tzID, HttpServletRequest request) throws Exception {
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            return terminZauzetostiRepository.findById(tzID).map(terminZauzetosti -> {
+                        terminZauzetosti.setDatumTretmana(newTerminZauzetosti.getDatumTretmana());
+                        terminZauzetosti.setVrijemePocetka(newTerminZauzetosti.getVrijemePocetka());
+                        terminZauzetosti.setVrijemeKraja(newTerminZauzetosti.getVrijemeKraja());
+                        return terminZauzetostiRepository.save(terminZauzetosti);
+                    })
+                    .orElseGet(() -> {
+                        newTerminZauzetosti.setID(tzID);
+                        return terminZauzetostiRepository.save(newTerminZauzetosti);
+                    });
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
     @DeleteMapping("/{tzID}")
-    void deleteTerminZauzetosti(@PathVariable int tzID) {
-        terminZauzetostiRepository.deleteById(tzID);
+    void deleteTerminZauzetosti(@PathVariable int tzID, HttpServletRequest request) throws Exception {
+        String ipAddress = request.getRemoteAddr();
+
+        if (ipAddress.equals("127.0.0.1")) {
+
+            terminZauzetostiRepository.deleteById(tzID);
+        }
+        else{
+            throw new Exception("Operation not allowed");
+        }
+
     }
 
 
